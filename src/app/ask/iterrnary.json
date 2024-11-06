@@ -1,0 +1,226 @@
+[
+  {
+    "day": 1,
+    "title": "Arrival and Check-In",
+    "description": "Arrive in Las Vegas and settle into the luxurious resort.",
+    "activities": [
+      {
+        "time": "3:00 PM",
+        "activity": "Check-in at the Bellagio Hotel",
+        "details": "Enjoy a VIP check-in experience with a private concierge and welcome champagne.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "5:00 PM",
+        "activity": "Explore the Bellagio Conservatory & Botanical Gardens",
+        "details": "Take a stroll through the beautiful seasonal gardens.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "8:00 PM",
+        "activity": "Dinner at Prime Steakhouse",
+        "details": "Dine at the renowned Prime Steakhouse, overlooking the Bellagio fountains.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "10:00 PM",
+        "activity": "Watch the Fountains of Bellagio Show",
+        "details": "Enjoy the iconic water fountain show with synchronized music.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      }
+    ]
+  },
+  {
+    "day": 2,
+    "title": "Luxury Shopping and Spa Day",
+    "description": "Relax and indulge in the luxury amenities and shopping.",
+    "activities": [
+      {
+        "time": "10:00 AM",
+        "activity": "Breakfast at Sadelle’s Cafe",
+        "details": "Enjoy a delicious breakfast at Sadelle’s in the Bellagio.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "11:30 AM",
+        "activity": "Shopping at The Shops at Crystals",
+        "details": "Visit high-end stores such as Louis Vuitton, Gucci, and Chanel.",
+        "location": {
+          "lat": 36.1075,
+          "lng": -115.1739
+        }
+      },
+      {
+        "time": "2:00 PM",
+        "activity": "Spa Day at the Bellagio Spa",
+        "details": "Relax with a full-body massage, facial, and access to the spa’s steam rooms and hot tubs.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "7:00 PM",
+        "activity": "Dinner at Picasso Restaurant",
+        "details": "Dine on Mediterranean cuisine surrounded by Picasso artwork.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      }
+    ]
+  },
+  {
+    "day": 3,
+    "title": "Adventure and Nightlife",
+    "description": "Experience Vegas thrill rides and the famous nightlife.",
+    "activities": [
+      {
+        "time": "9:00 AM",
+        "activity": "Breakfast at Bardot Brasserie",
+        "details": "Start the day with a French-inspired breakfast at Aria.",
+        "location": {
+          "lat": 36.1075,
+          "lng": -115.1739
+        }
+      },
+      {
+        "time": "10:30 AM",
+        "activity": "Helicopter Tour of the Grand Canyon",
+        "details": "Take an exhilarating helicopter ride over the Grand Canyon with landing and lunch.",
+        "location": {
+          "lat": 36.1069,
+          "lng": -115.1728
+        }
+      },
+      {
+        "time": "3:00 PM",
+        "activity": "Relaxation at the Bellagio Pool",
+        "details": "Unwind by the luxury poolside cabanas.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "8:00 PM",
+        "activity": "Dinner at Catch",
+        "details": "Enjoy an eclectic seafood menu with stunning decor.",
+        "location": {
+          "lat": 36.1069,
+          "lng": -115.1728
+        }
+      },
+      {
+        "time": "10:00 PM",
+        "activity": "Nightclub Experience at Omnia",
+        "details": "Dance the night away at one of Vegas’ top nightclubs, Omnia, with VIP table service.",
+        "location": {
+          "lat": 36.1162,
+          "lng": -115.1745
+        }
+      }
+    ]
+  },
+  {
+    "day": 4,
+    "title": "Art, Culture, and Fine Dining",
+    "description": "Immerse in art installations and exclusive dining experiences.",
+    "activities": [
+      {
+        "time": "10:00 AM",
+        "activity": "Brunch at Lago by Julian Serrano",
+        "details": "Enjoy a lavish Italian brunch with views of the fountains.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "12:00 PM",
+        "activity": "Visit the Neon Museum",
+        "details": "Tour the museum dedicated to iconic Las Vegas signs and history.",
+        "location": {
+          "lat": 36.1792,
+          "lng": -115.1340
+        }
+      },
+      {
+        "time": "3:00 PM",
+        "activity": "Art Tour at the Aria Fine Art Collection",
+        "details": "Discover unique sculptures, paintings, and installations throughout the Aria property.",
+        "location": {
+          "lat": 36.1075,
+          "lng": -115.1739
+        }
+      },
+      {
+        "time": "8:00 PM",
+        "activity": "Dinner at Joël Robuchon",
+        "details": "Experience fine dining at the only three Michelin-starred restaurant in Las Vegas.",
+        "location": {
+          "lat": 36.1069,
+          "lng": -115.1728
+        }
+      }
+    ]
+  },
+  {
+    "day": 5,
+    "title": "Relax and Departure",
+    "description": "End the trip on a relaxing note and prepare for departure.",
+    "activities": [
+      {
+        "time": "9:00 AM",
+        "activity": "Breakfast at The Buffet at Bellagio",
+        "details": "Savor a gourmet breakfast buffet with a variety of cuisines.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "11:00 AM",
+        "activity": "Last-minute Shopping at Fashion Show Mall",
+        "details": "Browse the latest collections and souvenirs before heading home.",
+        "location": {
+          "lat": 36.1275,
+          "lng": -115.1717
+        }
+      },
+      {
+        "time": "2:00 PM",
+        "activity": "Return to the hotel for checkout",
+        "details": "Check out of Bellagio and head to the airport.",
+        "location": {
+          "lat": 36.1126,
+          "lng": -115.1767
+        }
+      },
+      {
+        "time": "4:00 PM",
+        "activity": "Departure from Las Vegas",
+        "details": "Fly back home, concluding your luxury Vegas experience.",
+        "location": {
+          "lat": 36.0840,
+          "lng": -115.1537
+        }
+      }
+    ]
+  }
+]
