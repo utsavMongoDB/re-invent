@@ -1,70 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { promises as fs } from 'fs';
-import pdf from "pdf-parse";
-
 import { getEmbeddingsTransformer, searchArgs } from '@/utils/mongodb';
 import { MongoDBAtlasVectorSearch } from '@langchain/community/vectorstores/mongodb_atlas';
-import { CharacterTextSplitter } from 'langchain/text_splitter';
+import { MongoClient } from 'mongodb';
 
-
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
   try {
-    const formData: FormData = await req.formData();
-    const uploadedFiles = formData.getAll('filepond');
-    let fileName = '';
-    let parsedText = '';
+    const client = new MongoClient(process.env.MONGODB_URI!);
+    await client.connect();
+    const db = client.db("reinvent");
+    const collection = db.collection('travel');
 
-    if (uploadedFiles && uploadedFiles.length > 0) {
-      // Parse the data from uploaded file 
-      const uploadedFile = uploadedFiles[1];
-      console.log('Uploaded file:', uploadedFile);
-
-      if (uploadedFile instanceof File) {
-        fileName = uploadedFile.name.toLowerCase();
-
-        const tempFilePath = `/tmp/${fileName}.pdf`;
-        const fileBuffer = Buffer.from(await uploadedFile.arrayBuffer());
-
-        await fs.writeFile(tempFilePath, new Uint8Array(fileBuffer));
-        let dataBuffer = fs.readFile(tempFilePath);
-
-        await pdf(await dataBuffer).then(async function (data: { text: any; }) {
-          console.log(data.text);
-          // Collect the parsed data from the PDF file
-          parsedText = data.text;
-
-          // Spread data into chunks 
-          const chunks = await new CharacterTextSplitter({
-            separator: "\n",
-            chunkSize: 1000,
-            chunkOverlap: 100
-          }).splitText(parsedText)
-          console.log(chunks.length)
-
-          // Convert chunks to Vectors and store into MongoDB
-          await MongoDBAtlasVectorSearch.fromTexts(
-            chunks, [],
-            getEmbeddingsTransformer(),
-            searchArgs()
-          )});
-        return NextResponse.json({ message: "Uploaded to MongoDB" }, { status: 200 });
-
-      } else {
-        console.log('Uploaded file is not in the expected format.');
-        return NextResponse.json({ message: 'Uploaded file is not in the expected format' }, { status: 500 });
-      }
-    } else {
-      console.log('No files found.');
-      return NextResponse.json({ message: 'No files found' }, { status: 500 });
-
+    const documents = await collection.find({}).toArray();
+    if (documents.length === 0) {
+      console.log('No documents found.');
+      return NextResponse.json({ message: 'No documents found' }, { status: 404 });
     }
+
+    for (const doc of documents) {
+      const description = doc.description;
+      if (description) {
+        // Create embeddings for the description
+        const embeddings = await getEmbeddingsTransformer().embedQuery(description);
+        console.log(`Document ID: ${doc._id}, Embeddings created`);
+
+        // Update the document with the new embeddings field
+        await collection.updateOne(
+          { _id: doc._id },
+          { $set: { description_embedding: embeddings } }
+        );
+      } else {
+        console.log(`Document ID: ${doc._id} does not have a description.`);
+      }
+    }
+
+    await client.close();
+    return NextResponse.json({ message: "Processed documents and added embeddings to MongoDB" }, { status: 200 });
 
   } catch (error) {
     console.error('Error processing request:', error);
-    // Handle the error accordingly, for example, return an error response.
     return new NextResponse("An error occurred during processing.", { status: 500 });
   }
-
 }
-
-

@@ -1,11 +1,15 @@
 'use client';
 
+import fs from 'fs';
+import path from 'path';
 import { useChat } from 'ai/react';
 import { useState, useEffect } from 'react';
 import NavBar from '../component/navbar';
+import { CardSkeleton, FormSkeleton } from "@leafygreen-ui/skeleton-loader";
 import ItineraryCards from '../component/cards';
-import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import { GoogleMap, LoadScript, Marker, useJsApiLoader } from '@react-google-maps/api';
 import LeafyGreenProvider from '@leafygreen-ui/leafygreen-provider';
+import { Days, CustomTextInput, PlanButton } from '../component/prompt2';
 import TextInput from '@leafygreen-ui/text-input';
 import TextArea from '@leafygreen-ui/text-area';
 import { NumberInput } from '@leafygreen-ui/number-input';
@@ -14,15 +18,13 @@ import Icon from "@leafygreen-ui/icon";
 import Modal from "@leafygreen-ui/modal";
 import { css } from "@leafygreen-ui/emotion";
 import Tooltip from "@leafygreen-ui/tooltip";
-import { CardSkeleton } from '@leafygreen-ui/skeleton-loader';
-import { JsonView, allExpanded, darkStyles, defaultStyles } from 'react-json-view-lite';
-import 'react-json-view-lite/dist/index.css';
+import MarkdownRenderer from '../component/markdown';
 
 export default function Home() {
   const [waitingForAI, setWaitingForAI] = useState<boolean>(false);
   const { messages, input, handleInputChange, setInput, handleSubmit, isLoading } = useChat();
-  const [locations, setLocations] = useState<{ lat: number, lng: number, title: string }[][]>([[{ lat: 0, lng: 0, title: 'The center of the world' }]]);
-
+  const [locations, setLocations] = useState<{ lat: number, lng: number, title: string }[]>([{ lat: 0, lng: 0, title: 'The center of the world' }]);
+  
   // Get users location
   useEffect(() => {
     if (navigator.geolocation) {
@@ -33,7 +35,7 @@ export default function Home() {
             lng: position.coords.longitude,
             title: 'Journey Begins Here',
           };
-          setLocations([[userLocation]]);
+          setLocations([userLocation]);
         },
         (error) => {
           console.error("Error getting user's location:", error);
@@ -47,23 +49,19 @@ export default function Home() {
   const [location, setLocation] = useState<string>();
   const [theme, setTheme] = useState<string>();
   const [travelingWith, setTravelingWith] = useState<string>();
-  const [otherSpecifications, setOtherSpecifications] = useState<string>();
+  const [otherSpecifications, setOtherSpecifications] = useState<string>(); 
   const [open, setOpen] = useState(false);
-  const [hybridopen, setHybridOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [hybridSearchResults, setHybridSearchResults] = useState<Object>(['Nothing to see here yet!']);
-
-
   interface Itinerary {
     day: string;
     title: string;
-    // activities: [];
-    activities: string;
+    activities: [];
   }
 
+
+  const [itinerary, setItinerary] = useState<Itinerary[]>([]);
   useEffect(() => {
-    const newPrompt = `Plan a trip to ${location} for ${duration} days with a ${theme} theme. Other specifications: ${otherSpecifications}.`;
-    // const newPrompt = `Plan a trip to ${location} for ${duration} days with a ${theme} theme, traveling with ${travelingWith}. Other specifications: ${otherSpecifications}.`;
+    const newPrompt = `Plan a trip to ${location} for ${duration} days with a ${theme} theme, traveling with ${travelingWith}. Other specifications: ${otherSpecifications}.`;
     // setPrompt(newPrompt);
     setInput(newPrompt);
   }, [duration, location, theme, travelingWith, otherSpecifications]);
@@ -79,68 +77,36 @@ export default function Home() {
       parsedData.forEach((day: { activities: any[]; }) => {
         day.activities.forEach(activity => {
           if (activity.location) {
-            coordinates.push({ lat: activity.location.lat, lng: activity.location.lng, title: activity.activity });
+            coordinates.push({lat : activity.location.lat, lng: activity.location.lng, title: activity.activity});
           }
         });
-        setLocations(coordinates);
+      setLocations(coordinates);
       });
 
       console.log("jsonString", parsedData, locations);
 
       return parsedData;
     } catch (error) {
-      // console.error('Error parsing data:', error);
+      console.error('Error parsing data:', error);
       return null;
     }
-  }
-
-  function extractCoordinatesFromString(inputString: string): { lat: number, lng: number }[] {
-    const regex = /{lat:\s*([-+]?\d*\.?\d+),\s*lng:\s*([-+]?\d*\.?\d+)}/g;
-    const coordinates: { lat: number, lng: number }[] = [];
-    let match;
-    while ((match = regex.exec(inputString)) !== null) {
-      const lat = parseFloat(match[1]);
-      const lng = parseFloat(match[2]);
-      coordinates.push({ lat, lng });
-    }
-
-    return coordinates;
   }
 
   useEffect(() => {
     setWaitingForAI(true);
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      const coordinates: any[] = [];
       if (lastMessage.role === 'assistant') {
         setWaitingForAI(false);
-        // setItinerary(extractAndConvertMarkdownToJson(lastMessage.content));
-        coordinates.push(extractCoordinatesFromString(lastMessage.content))
-        fetch('/api/chat')
-          .then(response => response.json())
-          .then(data => {
-            console.log('Hybrid Search Results:', data);
-            setHybridSearchResults(data);
-          })
-          // .then(data => {
-          //   console.log('Hybrid Search Results:', data);
-
-          // })
-          .catch(error => {
-            console.error('Error fetching hybrid search results:', error);
-          });
-
+        setItinerary(extractAndConvertMarkdownToJson(lastMessage.content));
         // setWaitingForAI(true); // Remove to show json
       }
-      // console.log("coordinates", coordinates);
-      setLocations(coordinates);
-      // console.log("Messages", lastMessage);
     }
   }, [messages]);
 
 
   return (
-    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAP_API!}>
+    <LoadScript googleMapsApiKey="AIzaSyANzZ98TYECmb36brHpfo6dLHeOnScmZWA">
       <div>
         <LeafyGreenProvider baseFontSize={16}>
           <NavBar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
@@ -151,30 +117,25 @@ export default function Home() {
               <TextInput
                 label="📍 Planning to visit"
                 placeholder="Bahamas, Vegas, etc."
-                // value="1"
-                value={location}
+                // value="Vegas"
                 onChange={(e) => setLocation(e.target.value)}
               />
               <TextInput
                 label="🎨 Theme"
                 placeholder="Art, Adventure, etc."
-                // value="1"
-                value={theme}
+                // value="Art"
                 onChange={(e) => setTheme(e.target.value)}
               />
-              {/* <TextInput
+              <TextInput
                 label="👥 Traveling with"
                 placeholder="Friends, Family, etc."
-                // value="1"
-                value={travelingWith}
+                // value="Friends"
                 onChange={(e) => setTravelingWith(e.target.value)}
-              /> */}
+              />
               <TextInput
                 label="Other specification(s)"
                 placeholder="Museum, Beach, etc."
-                // value="1"
-                value={otherSpecifications}
-                size={50}
+                // value="Museum"
                 onChange={(e) => setOtherSpecifications(e.target.value)}
               />
               <NumberInput
@@ -182,23 +143,8 @@ export default function Home() {
                 unit="Days"
                 placeholder="3, 5, etc."
                 // value="2"
-                value={duration}
                 onChange={(e) => setDuration(e.target.value.toString())}
               />
-              <Button
-              type="button"
-              variant="baseGreen"
-              style={{ alignSelf: "center", width: "50px", height: "50px", borderRadius: "50%", marginRight: "10px" }}
-              onClick={() => {
-                setLocation("Vegas");
-                setTheme("Adventure");
-                setTravelingWith("Friends");
-                setOtherSpecifications("I want to explore Bellagio casino");
-                setDuration("1");
-              }}
-            >
-              <Icon glyph="Refresh" />
-            </Button>
               <div style={{ borderLeft: "1px solid #ccc", height: "100%", margin: "0 20px" }}></div>
             </div>
             <input
@@ -207,7 +153,6 @@ export default function Home() {
               placeholder="Ask what you have in mind"
               hidden
             />
-            
             <Button
               type="submit"
               rightGlyph={<Icon glyph="Sparkle" />}
@@ -221,41 +166,23 @@ export default function Home() {
           </form>
 
           <div style={{ marginTop: '10%', padding: '5%', display: "flex", justifyContent: 'space-evenly' }}>
-            <CardSkeleton hidden={!isLoading || !waitingForAI} style={{ padding: "5%", width: "35vw" }} />
+            <CardSkeleton hidden={!waitingForAI || !isLoading} style={{ padding: "5%", width: "35vw" }} />
             <>
-              {(
+              {waitingForAI && !isLoading && (
                 <div style={{ overflow: "auto", width: '35vw', display: 'flex', flexDirection: 'column' }} >
-                  {
-                    // itinerary?.length > 0 ? (
-                    // itinerary.map((dayPlan, index) => (
-                    //   <ItineraryCards key={index} title={`Day ${dayPlan.day}`} description={dayPlan.title} activities={dayPlan.activities} />
-                    // ))
-                    messages.at(-1) && messages.at(-1)?.role === 'assistant' ? (
-                        <>
-                        {
-                          messages.map((message, index) => (
-                          message.role === 'assistant' && message.content.split('#').filter(part => part.trim() !== '').map((part, partIndex) => {
-                            const titleMatch = part.match(/~~Title:\s*(.*)/);
-                            const descriptionMatch = part.match(/~~Description:\s*([\s\S]*)/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            <br></br>
-                            return title === '' ? <h2 key={partIndex}>{part}</h2> : (
-                            <ItineraryCards key={index + '-' + partIndex} title={'Day ' + (partIndex)} description={title} activities={descriptionMatch ? descriptionMatch[1] : ''} />
-                            );
-                          })
-                          ))
-                        }
-                        </>
-
-                    ) : (
-                      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
-                        <i>
-                          <h1 style={{ color: '#6666', fontSize: 'larger' }}>
-                            “Traveling—it leaves you speechless, then turns you into a storyteller.”— Ibn Battuta
-                          </h1>
-                        </i>
-                      </div>
-                    )}
+                  {itinerary?.length > 0 ? (
+                    itinerary.map((dayPlan, index) => (
+                      <ItineraryCards key={index} title={`Day ${dayPlan.day}`} description={dayPlan.title} activities={dayPlan.activities} />
+                    ))
+                  ) : (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
+                      <i>
+                        <h1 style={{ color: '#6666', fontSize: 'larger' }}>
+                          “Traveling—it leaves you speechless, then turns you into a storyteller.”— Ibn Battuta
+                        </h1>
+                      </i>
+                    </div>
+                  )}
                   <Tooltip trigger={<Button
                     variant="default"
                     disabled={isLoading}
@@ -277,30 +204,6 @@ export default function Home() {
                   </Button>}>
                     Ask for changes
                   </Tooltip>
-
-                  <Tooltip trigger={<Button
-                    variant="default"
-                    disabled={isLoading}
-                    style={{
-                      marginTop: '100px',
-                      width: '50px',
-                      height: '50px',
-                      borderRadius: '50%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'absolute',
-                      right: '20px'
-
-                    }}
-                    onClick={() => setHybridOpen((o) => !o)}
-                  >
-                    <Icon glyph='Code'> </Icon>
-
-                  </Button>}>
-                    Hybrid Search Results
-                  </Tooltip>
-
                   <Modal
                     className={css`
                   div[role="dialog"] {
@@ -327,29 +230,9 @@ export default function Home() {
                     </form>
                   </Modal>
 
-                  <Modal
-                    className={css`
-                  div[role="dialog"] {
-                  width: 800px;
-                  height: 600px;
-                  }
-                `}
-                    open={hybridopen}
-                    setOpen={setHybridOpen}
-                  >
-                    {/* <MarkdownRenderer
-                      content={hybridSearchResults}
-                    /> */}
-                    {/* <ReactJson src={{"data" : 12}} /> */}
-                    <h1 style={{ fontSize: '2em' }}> Hybrid Search Query Results </h1>
-                    <div style={{"overflow" : "auto", height: '500px' }}>
-                      <JsonView data={hybridSearchResults} shouldExpandNode={allExpanded} style={darkStyles} />
-                    </div>
-                  </Modal>
-
                 </div>
               )}
-              {/* {!waitingForAI && (
+              {!waitingForAI && (
                 <div>
                   <MarkdownRenderer
                     content={messages.length > 0 && messages[messages.length - 1].role !== 'user' ? messages[messages.length - 1].content : ''}
@@ -365,21 +248,21 @@ export default function Home() {
                     Prettify
                   </Button>
                 </div>)
-              } */}
+              }
             </>
+            <div style={{ borderLeft: '1px solid #ccc', margin: '0 0px' }}></div>
 
             {/* "AIzaSyANzZ98TYECmb36brHpfo6dLHeOnScmZWA"> */}
-            {locations[0]?.length > 0 && <div style={{ borderLeft: '1px solid #ccc', margin: '0 0px' }}></div>}
-            {locations[0]?.length > 0 &&
-              <GoogleMap
-                mapContainerStyle={{
+            {locations.length > 0 &&
+                <GoogleMap
+                  mapContainerStyle={{
                   width: '70vh',
                   height: '60vh',
                   borderRadius: '10px',
-                }}
-                center={locations[0][0]}
-                zoom={12}
-                options={{
+                  }}
+                  center={locations[0]}
+                  zoom={12}
+                  options={{
                   styles: [
                     { elementType: "geometry", stylers: [{ color: "#ebe3cd" }] },
                     { elementType: "labels.text.fill", stylers: [{ color: "#523735" }] },
@@ -493,21 +376,21 @@ export default function Home() {
                       stylers: [{ color: "#92998d" }],
                     },
                   ],
-                }}
-                onLoad={map => {
+                  }}
+                  onLoad={map => {
                   if (locations.length > 1) {
-                    map.panTo(locations[0][locations.length - 1]);
+                    map.panTo(locations[locations.length - 1]);
                   }
-                }}
-              >
-                {locations[0]?.map((loc, index) => (
-                  <Marker
-                    key={index}
-                    position={{ lat: loc.lat, lng: loc.lng }}
+                  }}
+                >
+                  {locations?.map((loc, index) => (
+                  <Marker 
+                    key={index} 
+                    position={{ lat: loc.lat, lng: loc.lng }} 
                     icon={{
-                      url: `map.png`,
-                    }}
-                    title={loc.title}
+                    url: `map.png`,
+                    }}                   
+                    title={loc.title} 
                     onClick={() => {
                       const infoWindow = new google.maps.InfoWindow({
                         content: `<h3>Location ${index + 1}</h3>`
@@ -515,8 +398,8 @@ export default function Home() {
                       // infoWindow.open({anchor:  , shouldFocus: false});
                     }}
                   />
-                ))}
-              </GoogleMap>
+                  ))}
+                </GoogleMap>
             }
           </div>
 

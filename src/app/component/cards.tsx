@@ -13,31 +13,42 @@ interface Activities {
   };
 }
 
+// const [open, setOpen] = useState(true);
+var open = true;
+
 interface ItineraryCardsProps {
   title: string;
   description: string;
-  activities: Activities[];
+  // activities: Activities[];
+  activities: string;
 }
 
 const ItineraryCards: React.FC<ItineraryCardsProps> = ({ title, description, activities }) => {
   return (
-    <ExpandableCard
+    <LeafyGreenProvider>
+      <ExpandableCard
       title={title}
       description={description}
-      // flagText="optional"
-      style={{ marginBottom: "1rem", width: "35vw", alignSelf: "center", fontSize:'large' }}
-    >
-      <ul>
-        {activities?.map((item, index) => (
-          <div>
-            <li className="activitiesData" key={index}><strong>{item.time}</strong> | {item.activity}</li>
-            {/* <li className="activitiesData" key={index}></li> */}
-            <li className="activitiesData" style={{fontSize:'small'}} key={index}><em>{item.details}</em></li>
-            <hr></hr>
+      isOpen={true}
+      style={{ marginBottom: "1rem", width: "35vw", alignSelf: "center", fontSize: 'medium', backgroundColor: "#e0f7e0", borderRadius: "10px", boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)" }}
+      >
+      <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
+        {activities.split('‣').filter(activity => activity.trim() !== '').map((activity, index) => (
+        <div key={index} style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
+          <div style={{ flex: "0 0 50px", textAlign: "center" }}>
+          <div style={{ width: "10px", height: "10px", backgroundColor: "#32cd32", borderRadius: "50%", margin: "0 auto" }}></div>
+          {index < activities.split('‣').filter(activity => activity.trim() !== '').length - 1 && <div style={{ width: "2px", height: "100%", backgroundColor: "#32cd32", margin: "0 auto" }}></div>}
           </div>
+          <div style={{ flex: "1", paddingLeft: "1rem" }}>
+          <li className="activitiesData" style={{ marginBottom: "0.5rem", color: "#333" }}>{activity.trim()}</li>
+          <hr style={{ margin: "0.5rem 0", borderColor: "#32cd32" }} />
+          </div>
+        </div>
         ))}
       </ul>
-    </ExpandableCard>
+      
+      </ExpandableCard>
+    </LeafyGreenProvider>
   );
 }
 
