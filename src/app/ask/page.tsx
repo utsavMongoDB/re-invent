@@ -17,12 +17,16 @@ import Tooltip from "@leafygreen-ui/tooltip";
 import { CardSkeleton } from '@leafygreen-ui/skeleton-loader';
 import { JsonView, allExpanded, darkStyles, defaultStyles } from 'react-json-view-lite';
 import 'react-json-view-lite/dist/index.css';
+import Chat from '../component/chat';
+import { Tabs, Tab } from "@leafygreen-ui/tabs";
 
 export default function Home() {
+  const [selected, setSelected] = useState(0);
+  const [darkMode, setDarkMode] = useState(true);
   const [waitingForAI, setWaitingForAI] = useState<boolean>(false);
   const { messages, input, handleInputChange, setInput, handleSubmit, isLoading } = useChat();
   const [locations, setLocations] = useState<{ lat: number, lng: number, title: string }[][]>([[{ lat: 0, lng: 0, title: 'The center of the world' }]]);
-
+  const API_KEY = process.env.GOOGLE_MAP_API!;
   // Get users location
   useEffect(() => {
     if (navigator.geolocation) {
@@ -52,7 +56,7 @@ export default function Home() {
   const [hybridopen, setHybridOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [hybridSearchResults, setHybridSearchResults] = useState<Object>(['Nothing to see here yet!']);
-
+  const [hybridSearchQuery, setHybridSearchQuery] = useState<Object>(['Nothing to see here yet!']);
 
   interface Itinerary {
     day: string;
@@ -68,31 +72,6 @@ export default function Home() {
     setInput(newPrompt);
   }, [duration, location, theme, travelingWith, otherSpecifications]);
 
-  function extractAndConvertMarkdownToJson(markdownString: string): any {
-    try {
-      // Extract the JSON string from the Markdown content
-      const match = markdownString.match(/```json([\s\S]*?)```/);
-      const jsonString = match ? match[1].trim() : '';
-      // Parse the JSON string
-      const parsedData = JSON.parse(jsonString);
-      const coordinates: any[] = [];
-      parsedData.forEach((day: { activities: any[]; }) => {
-        day.activities.forEach(activity => {
-          if (activity.location) {
-            coordinates.push({ lat: activity.location.lat, lng: activity.location.lng, title: activity.activity });
-          }
-        });
-        setLocations(coordinates);
-      });
-
-      console.log("jsonString", parsedData, locations);
-
-      return parsedData;
-    } catch (error) {
-      // console.error('Error parsing data:', error);
-      return null;
-    }
-  }
 
   function extractCoordinatesFromString(inputString: string): { lat: number, lng: number }[] {
     const regex = /{lat:\s*([-+]?\d*\.?\d+),\s*lng:\s*([-+]?\d*\.?\d+)}/g;
@@ -120,34 +99,41 @@ export default function Home() {
           .then(response => response.json())
           .then(data => {
             console.log('Hybrid Search Results:', data);
-            setHybridSearchResults(data);
+            setHybridSearchResults(data['results']);
+            setHybridSearchQuery(data['hybridSearchQuery']);
           })
-          // .then(data => {
-          //   console.log('Hybrid Search Results:', data);
-
-          // })
           .catch(error => {
             console.error('Error fetching hybrid search results:', error);
           });
 
-        // setWaitingForAI(true); // Remove to show json
       }
-      // console.log("coordinates", coordinates);
       setLocations(coordinates);
-      // console.log("Messages", lastMessage);
     }
   }, [messages]);
 
 
   return (
-    <LoadScript googleMapsApiKey={process.env.GOOGLE_MAP_API!}>
+    <LoadScript googleMapsApiKey={"AIzaSyANzZ98TYECmb36brHpfo6dLHeOnScmZWA"}>
       <div>
         <LeafyGreenProvider baseFontSize={16}>
           <NavBar isLoggedIn={isLoggedIn} setIsLoggedIn={setIsLoggedIn} />
 
           <form className="chat-window" onSubmit={handleSubmit}>
             <div className="prompt-options">
-
+              <Button
+                type="button"
+                variant="baseGreen"
+                style={{ alignSelf: "center", width: "50px", height: "50px", borderRadius: "50%", marginRight: "10px" }}
+                onClick={() => {
+                  setLocation("Vegas");
+                  setTheme("Adventure");
+                  setTravelingWith("Friends");
+                  setOtherSpecifications("I want to explore Bellagio casino");
+                  setDuration("1");
+                }}
+              >
+                <Icon glyph="Refresh" />
+              </Button>
               <TextInput
                 label="📍 Planning to visit"
                 placeholder="Bahamas, Vegas, etc."
@@ -185,20 +171,7 @@ export default function Home() {
                 value={duration}
                 onChange={(e) => setDuration(e.target.value.toString())}
               />
-              <Button
-              type="button"
-              variant="baseGreen"
-              style={{ alignSelf: "center", width: "50px", height: "50px", borderRadius: "50%", marginRight: "10px" }}
-              onClick={() => {
-                setLocation("Vegas");
-                setTheme("Adventure");
-                setTravelingWith("Friends");
-                setOtherSpecifications("I want to explore Bellagio casino");
-                setDuration("1");
-              }}
-            >
-              <Icon glyph="Refresh" />
-            </Button>
+
               <div style={{ borderLeft: "1px solid #ccc", height: "100%", margin: "0 20px" }}></div>
             </div>
             <input
@@ -207,10 +180,10 @@ export default function Home() {
               placeholder="Ask what you have in mind"
               hidden
             />
-            
+
             <Button
               type="submit"
-              rightGlyph={<Icon glyph="Sparkle" />}
+              rightGlyph={<Icon glyph="Wizard" />}
               variant="baseGreen"
               isLoading={isLoading}
               loadingText={"working on it..."}
@@ -231,21 +204,32 @@ export default function Home() {
                     //   <ItineraryCards key={index} title={`Day ${dayPlan.day}`} description={dayPlan.title} activities={dayPlan.activities} />
                     // ))
                     messages.at(-1) && messages.at(-1)?.role === 'assistant' ? (
-                        <>
+                      <>
                         {
                           messages.map((message, index) => (
-                          message.role === 'assistant' && message.content.split('#').filter(part => part.trim() !== '').map((part, partIndex) => {
-                            const titleMatch = part.match(/~~Title:\s*(.*)/);
-                            const descriptionMatch = part.match(/~~Description:\s*([\s\S]*)/);
-                            const title = titleMatch ? titleMatch[1] : '';
-                            <br></br>
-                            return title === '' ? <h2 key={partIndex}>{part}</h2> : (
-                            <ItineraryCards key={index + '-' + partIndex} title={'Day ' + (partIndex)} description={title} activities={descriptionMatch ? descriptionMatch[1] : ''} />
-                            );
-                          })
+                            message.role === 'assistant' && message.content.split('#').filter(part => part.trim() !== '').map((part, partIndex) => {
+                              const titleMatch = part.match(/~~Title:\s*(.*)/);
+                              const descriptionMatch = part.match(/~~Description:\s*([\s\S]*)/);
+                              const title = titleMatch ? titleMatch[1] : '';
+
+                              return title === '' ? (
+                                <div>
+                                 
+                                  <div>
+                                    <h2>{part}</h2>
+                                  </div>
+                                  <br />
+                                </div>
+                              ) : (
+                                <div key={index + '-' + partIndex} style={{ alignItems: 'center' }}>
+                                  <ItineraryCards title={'Day ' + (partIndex)} description={title} activities={descriptionMatch ? descriptionMatch[1] : ''} />
+                                  <hr style={{ width: '100%', margin: '20px 0' }} />
+                                </div>
+                              );
+                            })
                           ))
                         }
-                        </>
+                      </>
 
                     ) : (
                       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
@@ -341,12 +325,27 @@ export default function Home() {
                       content={hybridSearchResults}
                     /> */}
                     {/* <ReactJson src={{"data" : 12}} /> */}
-                    <h1 style={{ fontSize: '2em' }}> Hybrid Search Query Results </h1>
-                    <div style={{"overflow" : "auto", height: '500px' }}>
-                      <JsonView data={hybridSearchResults} shouldExpandNode={allExpanded} style={darkStyles} />
-                    </div>
+                    <Tabs
+                      aria-label="demo tabs"
+                      setSelected={setSelected}
+                      selected={selected}
+                    >
+                      <Tab name="Hybrid Search Query">
+                        {/* <h1 style={{ fontSize: '2em' }}> Hybrid Search Query </h1> */}
+                        <div style={{ "overflow": "auto", height: '500px' }}>
+                          <br></br>
+                          <JsonView data={hybridSearchQuery} shouldExpandNode={allExpanded} style={defaultStyles} />
+                        </div>
+                      </Tab>
+                      <Tab name="Hybrid Search Query Results">
+                        {/* <h1 style={{ fontSize: '2em' }}> Hybrid Search Query Results </h1> */}
+                        <div style={{ "overflow": "auto", height: '500px' }}>
+                          <br></br>
+                          <JsonView data={hybridSearchResults} shouldExpandNode={allExpanded} style={defaultStyles} />
+                        </div>
+                      </Tab>
+                    </Tabs>
                   </Modal>
-
                 </div>
               )}
               {/* {!waitingForAI && (
@@ -376,6 +375,8 @@ export default function Home() {
                   width: '70vh',
                   height: '60vh',
                   borderRadius: '10px',
+                  position: 'sticky',
+                  top: 0
                 }}
                 center={locations[0][0]}
                 zoom={12}
@@ -525,7 +526,7 @@ export default function Home() {
           </p>
 
         </LeafyGreenProvider>
-      </div>
-    </LoadScript>
+      </div >
+    </LoadScript >
   );
 }

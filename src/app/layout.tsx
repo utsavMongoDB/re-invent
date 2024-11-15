@@ -5,8 +5,8 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "trip-planner",
-  description: "RAG using MongoDB Atlas & OpenAI"
+  title: "TripSage",
+  description: "A trip planning agent built using Anthropic and MongoDB."
 };
 
 export default function RootLayout({

@@ -201,5 +201,5 @@ export async function hybridSearch(queryVector: number[], textQuery: string) {
     }
 
     await client.close();
-    return results;
+    return [results, pipeline];
 }

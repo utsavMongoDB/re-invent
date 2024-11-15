@@ -3,6 +3,7 @@ import { hybridSearch, getEmbeddingsTransformer } from '@/utils/mongodb';
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock';
 
 var results:any = [];
+var hybridSearchQuery:any = [];
 
 // Bedrock configuration
 const bedrockConfig = {
@@ -18,7 +19,8 @@ async function retrieveContext(query: string) {
     const queryVector = await getEmbeddingsTransformer().embedQuery(query);
     // console.log("queryVector", queryVector);
     results = await hybridSearch(queryVector, query);
-    const contextIds = results.map((result: { description: any; }) => result.description).join(', ');
+    const contextIds = results[0].map((result: { description: any; }) => result.description).join(', ');
+    hybridSearchQuery = results[1]
     return contextIds;
 }
 
@@ -121,7 +123,7 @@ export async function POST(req: Request) {
         \n\nContext: ${context}\
         \n\nUser Query: ${question}\
         \n\nChat History: ${chatHistory} \
-        please provide a response, based on the above context and query. Add a small description at the top about the itinerary and tell why you think this is going to be great . \
+        please provide a response, based on the above context and query. Add a liner about the itinerary at the top and keep it conversational. \
         Restrict your knowledge to only the provided context. Reply with I don't know if you don't know the answer. \
         Do not make up answers.`;
 
@@ -149,12 +151,7 @@ export async function POST(req: Request) {
 
 export async function GET(req: Request) {
     try {
-        // console.log('Results:', results);
-        // results = JSON.stringify({ results }) 
-        console.log('Results:', JSON.stringify(results));
-        // console.log("Res", results);
-
-        return new Response( JSON.stringify(results), {
+        return new Response( JSON.stringify({"results" : results, "hybridSearchQuery" : hybridSearchQuery}), {
             headers: { 'Content-Type': 'application/json' },
             status: 200,
         });
