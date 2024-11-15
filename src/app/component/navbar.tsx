@@ -23,7 +23,7 @@ const NavBar: React.FC<NavBarProps> = ({ isLoggedIn, setIsLoggedIn }) => {
           </Link>
         </li> */}
         <li style={{ display: 'inline', marginLeft: '2rem' }}>
-          <Link href="/ask">
+          <Link href="/">
             Trip Planner
           </Link>
         </li>

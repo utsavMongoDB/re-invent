@@ -52,7 +52,7 @@ const TripPlannerForm: React.FC<TripPlannerFormProps> = ({ setWaitingForAI, setP
             className="flex rounded-none border-0 border-b-2 border-dotted border-[#e5e7eb] px-2 py-2 text-sm placeholder-[#6b7280] focus:outline-none focus:ring-0 focus:border-[#9ca3af] disabled:cursor-not-allowed disabled:opacity-50 text-[#f9fafb] bg-black"
             placeholder="art, adventure, etc."
           />
-          <p> theme, let's make it </p>
+          <p> theme, let us make it </p>
           <input
             value={budget}
             onChange={handleBudgetChange}

@@ -10,7 +10,7 @@ const Login: React.FC = () => {
     e.preventDefault();
     if (username === 'user' && password === 'admin') {
       localStorage.setItem('isLoggedIn', 'true');
-      window.location.href = '/ask'; // Redirect to home page
+      window.location.href = '/'; // Redirect to home page
     } else {
       setError('Invalid username or password');
     }
