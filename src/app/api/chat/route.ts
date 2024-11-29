@@ -124,7 +124,7 @@ export async function POST(req: Request) {
         \n\nUser Query: ${question}\
         \n\nChat History: ${chatHistory} \
         please provide a response, based on the above context and query. Add a liner about the itinerary at the top and keep it conversational. \
-        Restrict your knowledge to only the provided context. Reply with I don't know if you don't know the answer. \
+        Restrict your knowledge to only the provided context. Reply with my knowledge is restricted to only USA or I don't know if you don't know the answer. \
         Do not make up answers.`;
 
         // Initialize the language model

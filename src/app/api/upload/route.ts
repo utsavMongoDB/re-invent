@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getEmbeddingsTransformer, searchArgs } from '@/utils/mongodb';
-import { MongoDBAtlasVectorSearch } from '@langchain/community/vectorstores/mongodb_atlas';
 import { MongoClient } from 'mongodb';
 
 export async function GET(req: NextRequest) {
@@ -18,15 +17,19 @@ export async function GET(req: NextRequest) {
 
     for (const doc of documents) {
       const description = doc.description;
+      const region = doc.region;
+      const location = JSON.stringify(doc.location);
+      const spot = doc.spot;
       if (description) {
         // Create embeddings for the description
-        const embeddings = await getEmbeddingsTransformer().embedQuery(description);
+        const combined = `Region: ${region}\nLocation: ${location}\nSpot: ${spot}\nDescription: ${description}`;
+        const embeddings = await getEmbeddingsTransformer().embedQuery(combined);
         console.log(`Document ID: ${doc._id}, Embeddings created`);
 
         // Update the document with the new embeddings field
         await collection.updateOne(
           { _id: doc._id },
-          { $set: { description_embedding: embeddings } }
+          { $set: { description_embedding: embeddings, combined_data: combined  } }
         );
       } else {
         console.log(`Document ID: ${doc._id} does not have a description.`);

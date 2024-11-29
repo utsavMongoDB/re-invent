@@ -95,7 +95,8 @@ export async function hybridSearch(queryVector: number[], textQuery: string) {
           '$project': {
             'vs_score': 1, 
             '_id': 1, 
-            'description': 1
+            'description': 1,
+            'combined_data' : 1
           }
         }, {
           '$unionWith': {
@@ -106,7 +107,7 @@ export async function hybridSearch(queryVector: number[], textQuery: string) {
                   'index': 'default', 
                   'text': {
                     'query': extractedString, 
-                    'path': 'description'
+                    'path': 'combined_data'
                   }
                 }
               }, {
@@ -135,7 +136,7 @@ export async function hybridSearch(queryVector: number[], textQuery: string) {
           '$group': {
             '_id': '$_id', 
             'description': {
-              '$first': '$description'
+              '$first': '$combined_data'
             }, 
             'vs_score': {
               '$max': '$vs_score'

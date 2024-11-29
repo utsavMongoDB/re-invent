@@ -98,7 +98,7 @@ export default function Home() {
         fetch('/api/chat')
           .then(response => response.json())
           .then(data => {
-            console.log('Hybrid Search Results:', data);
+            // console.log('Hybrid Search Results:', data);
             setHybridSearchResults(data['results']);
             setHybridSearchQuery(data['hybridSearchQuery']);
           })
@@ -124,19 +124,38 @@ export default function Home() {
                 type="button"
                 variant="baseGreen"
                 style={{ alignSelf: "center", width: "50px", height: "50px", borderRadius: "50%", marginRight: "10px" }}
-                onClick={() => {
-                  setLocation("Vegas");
-                  setTheme("Adventure");
-                  setTravelingWith("Friends");
-                  setOtherSpecifications("I want to explore Bellagio casino");
-                  setDuration("1");
-                }}
+                // onClick={() => {
+                //   setLocation("New York");
+                //   setTheme("Adventure");
+                //   setTravelingWith("Friends");
+                //   setOtherSpecifications("Do include times square");
+                //   setDuration("1");
+                // }}
+              onClick={() => {
+                const locations = ["Massachusetts", "New York", "Vegas", "Hawaii", "Florida", ];
+                const themes = ["Adventure", "Relaxation", "Cultural", "Nature"];
+                const companions = ["Friends", "Family", "Solo", "Partner"];
+                const specifications = ["Include popular landmarks", "Focus on local cuisine", "Include outdoor activities", "Include historical sites"];
+                const durations = ["1", "2"];
+
+                const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+                const randomTheme = themes[Math.floor(Math.random() * themes.length)];
+                const randomCompanion = companions[Math.floor(Math.random() * companions.length)];
+                const randomSpecification = specifications[Math.floor(Math.random() * specifications.length)];
+                const randomDuration = durations[Math.floor(Math.random() * durations.length)];
+
+                setLocation(randomLocation);
+                setTheme(randomTheme);
+                setTravelingWith(randomCompanion);
+                setOtherSpecifications(randomSpecification);
+                setDuration(randomDuration);
+              }}
               >
                 <Icon glyph="Refresh" />
               </Button>
               <TextInput
                 label="📍 Planning to visit"
-                placeholder="Bahamas, Vegas, etc."
+                placeholder="New York, Vegas, etc."
                 // value="1"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -214,7 +233,7 @@ export default function Home() {
 
                               return title === '' ? (
                                 <div>
-                                 
+
                                   <div>
                                     <h2>{part}</h2>
                                   </div>
@@ -374,9 +393,7 @@ export default function Home() {
                 mapContainerStyle={{
                   width: '70vh',
                   height: '60vh',
-                  borderRadius: '10px',
-                  position: 'sticky',
-                  top: 0
+                  borderRadius: '10px'
                 }}
                 center={locations[0][0]}
                 zoom={12}
@@ -521,7 +538,7 @@ export default function Home() {
             }
           </div>
 
-          <p style={{ color: "gray", fontSize: 'small', textAlign: 'center' }}>
+          <p style={{ color: "gray", fontSize: 'small', textAlign: 'center', position: 'sticky', bottom: 0, backgroundColor: 'white', padding: '10px' }}>
             Made with ❤️ by <a href="https://www.linkedin.com/in/utsav-talwar/" target="_blank" rel="noopener noreferrer">Utsav Talwar</a>
           </p>
 
