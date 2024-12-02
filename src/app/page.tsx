@@ -253,9 +253,9 @@ export default function Home() {
                     ) : (
                       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%' }}>
                         <i>
-                          <h1 style={{ color: '#6666', fontSize: 'larger' }}>
-                            “Traveling—it leaves you speechless, then turns you into a storyteller.”— Ibn Battuta
-                          </h1>
+                            <h1 style={{ color: '#6666', fontSize: 'larger', lineHeight: '5vh' }}>
+                            "Build amazing itineraries using MongoDB and Amazon Bedrock with Anthropic Claude underneath, for your USA trips."
+                            </h1>
                         </i>
                       </div>
                     )}
